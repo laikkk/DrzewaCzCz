@@ -196,7 +196,92 @@ void TreeInsert(Wskwezla* T, Wskwezla z)
 
 }
 
+void LeftRotate(Wskwezla* T, Wskwezla x)
+{
+    Wskwezla y = x->right;
+    x->right = y->left;
+    if (y->left!=nil)
+    {
+        y->left->p = x;
+        y->p = x->p;
+        if (x->p==nil)
+            *T = y;
+        else if (x==x->p->left)
+            x->p->left = y;
+        else x->p->right = y;
+    }
+    //?
+    y->left = x;
+    x->p = y;
+}
 
+void RightRotate(Wskwezla* T, Wskwezla y)
+{
+    Wskwezla x = y->left;
+    y->left = x->right;
+    if (y->right!=nil)
+    {
+        x->right->p = y;
+        x->p = y->p;
+        if (y->p==nil)
+            *T = x;
+        else if (y==y->p->right)
+            y->p->right = x;
+        else y->p->left = x;
+    }
+    //?
+    x->right = y;
+    y->p = x;
+}
+
+void RBInsert(Wskwezla* T, Wskwezla x)
+{
+    TreeInsert(T, x);
+    Wskwezla y;
+    //kolorowanie jest juz zrobione podczas inicjowania Wezla
+    while (x!=T && x->p->kolor==RED)
+    {
+        if (x->p==x->p->p->left)
+        {
+            y = x->p->p->right;
+            if (y->kolor==RED)
+            {
+                x->p->kolor = BLACK;
+                y->kolor = BLACK;
+                x->p->p->kolor = RED;
+                x = x->p->p;
+            }
+            else if (x==x->p->right)
+            {
+                x = x->p;
+                LeftRotate(T,x);
+                x->p->kolor = BLACK;
+                x->p->p->klucz = RED;
+                RightRotate(T,x);
+            }
+        }
+        else
+        {
+            y = x->p->p->left;
+            if (y->kolor==RED)
+            {
+                x->p->kolor = BLACK;
+                y->kolor = BLACK;
+                x->p->p->kolor = RED;
+                x = x->p->p;
+            }
+            else if (x==x->p->left)
+            {
+                x = x->p;
+                LeftRotate(T,x);
+                x->p->kolor = BLACK;
+                x->p->p->klucz = RED;
+                RightRotate(T,x);
+            }
+        }
+        (*T)->kolor = BLACK;
+    }
+}
 
 /* ----------------- program testujacy -----------------------*/
 
@@ -240,27 +325,40 @@ int main()
     // getchar();
 
     w5 = nowyWezel(5, BLACK);
-    TreeInsert(&korzen, w5);
+    //TreeInsert(&korzen, w5);
+    RBInsert(&korzen, w5);
+    drukujDot(korzen);
     drukuj(korzen);
     // getchar();
-
-    w3 = nowyWezel(3, BLACK);
-    TreeInsert(&korzen, w3);
+  
+  
+    w3 = nowyWezel(3, RED);
+    RBInsert(&korzen, w3);
+    //TreeInsert(&korzen, w3);
+      drukujDot(korzen);
     drukuj(korzen);
     //getchar();
 
-    w8 = nowyWezel(8, RED);
-    TreeInsert(&korzen, w8);
-    drukuj(korzen);
-    //getchar();
+  
+        w8 = nowyWezel(8, RED);
+         RBInsert(&korzen, w8);
+    //TreeInsert(&korzen, w8);
+      drukujDot(korzen);
+        drukuj(korzen);
+        //getchar();
 
-    w6 = nowyWezel(6, BLACK);
-    TreeInsert(&korzen, w6);
-    drukuj(korzen);
+        w6 = nowyWezel(6, RED);
+         RBInsert(&korzen, w6);
+    //TreeInsert(&korzen, w6);
+      drukujDot(korzen);
+        drukuj(korzen);
 
-    w9 = nowyWezel(9, BLACK);
-    TreeInsert(&korzen, w9);
-    drukuj(korzen);
+        w9 = nowyWezel(9, RED);
+         RBInsert(&korzen, w9);
+    //TreeInsert(&korzen, w9);
+      drukujDot(korzen);
+        drukuj(korzen);
+      /* */
 
     /*
          nilInit();
