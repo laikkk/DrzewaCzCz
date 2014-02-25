@@ -1,4 +1,4 @@
-//                                          pmp@inf.ug.edu.pl  2014
+//  pmp@inf.ug.edu.pl  2014
 // drukowanie drzew cz-cz z wartownikiem wspolnym
 // dla wszystkich wezlow:
 // drukowanie na ekran tekstowy i przez dot
@@ -9,8 +9,8 @@
 
 #define RED 1        /* stala oznaczajaca kolor wezla */
 #define BLACK 0      /* stala oznaczajaca kolor wezla */
-#define SZER_EKR 80  /* szerokosc ekranu */
-#define IL_POZ   5   /* ilosc poziomow drzewa, ktore beda wydrukowane   */
+#define SZER_EKR 140  /* szerokosc ekranu */
+#define IL_POZ   15   /* ilosc poziomow drzewa, ktore beda wydrukowane   */
 /* gwiazdka bedzie sygnalizowac istnienie nizszych */
 /* poziomow                                        */
 
@@ -201,16 +201,13 @@ void LeftRotate(Wskwezla* T, Wskwezla x)
     Wskwezla y = x->right;
     x->right = y->left;
     if (y->left!=nil)
-    {
         y->left->p = x;
-        y->p = x->p;
-        if (x->p==nil)
-            *T = y;
-        else if (x==x->p->left)
-            x->p->left = y;
-        else x->p->right = y;
-    }
-    //?
+    y->p = x->p;
+    if (x->p==nil)
+        *T = y;
+    else if (x==x->p->left)
+        x->p->left = y;
+    else x->p->right = y;
     y->left = x;
     x->p = y;
 }
@@ -220,16 +217,13 @@ void RightRotate(Wskwezla* T, Wskwezla y)
     Wskwezla x = y->left;
     y->left = x->right;
     if (y->right!=nil)
-    {
         x->right->p = y;
-        x->p = y->p;
-        if (y->p==nil)
-            *T = x;
-        else if (y==y->p->right)
-            y->p->right = x;
-        else y->p->left = x;
-    }
-    //?
+    x->p = y->p;
+    if (y->p==nil)
+        *T = x;
+    else if (y==y->p->right)
+        y->p->right = x;
+    else y->p->left = x;
     x->right = y;
     y->p = x;
 }
@@ -239,7 +233,7 @@ void RBInsert(Wskwezla* T, Wskwezla x)
     TreeInsert(T, x);
     Wskwezla y;
     //kolorowanie jest juz zrobione podczas inicjowania Wezla
-    while (x!=T && x->p->kolor==RED)
+    while (x!=*T&&(x->p->kolor==RED))
     {
         if (x->p==x->p->p->left)
         {
@@ -251,13 +245,16 @@ void RBInsert(Wskwezla* T, Wskwezla x)
                 x->p->p->kolor = RED;
                 x = x->p->p;
             }
-            else if (x==x->p->right)
+            else
             {
-                x = x->p;
-                LeftRotate(T,x);
+                if (x==x->p->right)
+                {
+                    x = x->p;
+                    LeftRotate(T, x);
+                }
                 x->p->kolor = BLACK;
-                x->p->p->klucz = RED;
-                RightRotate(T,x);
+                x->p->p->kolor = RED;
+                RightRotate(T, x->p->p);
             }
         }
         else
@@ -270,17 +267,54 @@ void RBInsert(Wskwezla* T, Wskwezla x)
                 x->p->p->kolor = RED;
                 x = x->p->p;
             }
-            else if (x==x->p->left)
+            else
             {
-                x = x->p;
-                LeftRotate(T,x);
+                if (x==x->p->left)
+                {
+                    x = x->p;
+                    RightRotate(T, x);
+                }
                 x->p->kolor = BLACK;
-                x->p->p->klucz = RED;
-                RightRotate(T,x);
+                x->p->p->kolor = RED;
+                LeftRotate(T, x->p->p);
             }
         }
-        (*T)->kolor = BLACK;
     }
+    (*T)->kolor = BLACK;
+}
+int iloscCzeronych = 0;
+
+void IleCzerwonychWezlow(Wskwezla Korzen)
+{
+    if (Korzen!=NULL)
+    {
+        IleCzerwonychWezlow(Korzen->left);
+        if (Korzen->kolor==RED)iloscCzeronych++;
+        IleCzerwonychWezlow(Korzen->right);
+    }
+
+}
+
+int glebokoscMax(Wskwezla t, int poziom)
+{
+    //Zlicza poziom nagłebszego liscia
+    int lewy = 0, prawy = 0;
+    if (t->left==nil&&t->right==nil) return poziom;
+    if (t->left!=nil) lewy = glebokoscMax(t->left, poziom+1);
+    if (t->right!=nil) prawy = glebokoscMax(t->right, poziom+1);
+    if (lewy>prawy) return lewy;
+    else return prawy;
+}
+
+int glebokoscMin(Wskwezla t, int poziom)
+{
+    //zlicza poziom najpłytszego liścia
+    int lewy = 0, prawy = 0;
+    if (t->left==nil&&t->right==nil) return poziom;
+    if (t->left!=nil) lewy = glebokoscMax(t->left, poziom+1);
+    if (t->right!=nil) prawy = glebokoscMax(t->right, poziom+1);
+    if (lewy<prawy) return lewy;
+    else return prawy;
 }
 
 /* ----------------- program testujacy -----------------------*/
@@ -322,78 +356,76 @@ int main()
     korzen = nil;
 
     drukuj(korzen);
-    // getchar();
 
     w5 = nowyWezel(5, BLACK);
-    //TreeInsert(&korzen, w5);
     RBInsert(&korzen, w5);
     drukujDot(korzen);
     drukuj(korzen);
     // getchar();
-  
-  
+
     w3 = nowyWezel(3, RED);
     RBInsert(&korzen, w3);
-    //TreeInsert(&korzen, w3);
-      drukujDot(korzen);
+    drukujDot(korzen);
     drukuj(korzen);
     //getchar();
 
-  
-        w8 = nowyWezel(8, RED);
-         RBInsert(&korzen, w8);
-    //TreeInsert(&korzen, w8);
-      drukujDot(korzen);
-        drukuj(korzen);
-        //getchar();
+    w8 = nowyWezel(8, RED);
+    RBInsert(&korzen, w8);
+    drukujDot(korzen);
+    drukuj(korzen);
+    //getchar();
 
-        w6 = nowyWezel(6, RED);
-         RBInsert(&korzen, w6);
-    //TreeInsert(&korzen, w6);
-      drukujDot(korzen);
-        drukuj(korzen);
+    w6 = nowyWezel(6, RED);
+    RBInsert(&korzen, w6);
+    drukujDot(korzen);
+    drukuj(korzen);
+    //getchar();
 
-        w9 = nowyWezel(9, RED);
-         RBInsert(&korzen, w9);
-    //TreeInsert(&korzen, w9);
-      drukujDot(korzen);
-        drukuj(korzen);
-      /* */
+    w9 = nowyWezel(9, RED);
+    RBInsert(&korzen, w9);
+    drukujDot(korzen);
+    drukuj(korzen);
+    //getchar();
 
-    /*
-         nilInit();
-         Wskwezla korzen,w5,w3,w8,w6,w9;
-         korzen=nil;
-         drukuj(korzen);
-         drukujDot(korzen);
-         getchar();
+    Wskwezla w899;
+    w899 = nowyWezel(899, RED);
+    RBInsert(&korzen, w899);
+    drukujDot(korzen);
+    drukuj(korzen);
+    //getchar();
 
-         w5=nowyWezel(5,BLACK);
-         korzen=w5;
-         drukuj(korzen);
-         drukujDot(korzen);
-         getchar();
+    Wskwezla w900;
+    w900 = nowyWezel(900, RED);
+    RBInsert(&korzen, w900);
+    drukujDot(korzen);
+    drukuj(korzen);
+    //getchar();
 
-         w3=nowyWezel(3,BLACK);
-         w3->p = w5; w5->left = w3;
-         drukuj(korzen);
-         drukujDot(korzen);
-         getchar();
+    Wskwezla w903;
+    w903 = nowyWezel(903, RED);
+    RBInsert(&korzen, w903);
+    drukujDot(korzen);
+    drukuj(korzen);
+    //getchar();
 
-         w8=nowyWezel(8,RED);
-         w5->right = w8; w8->p = w5;
-         drukuj(korzen);
-         drukujDot(korzen);
-         getchar();
+    Wskwezla w902;
+    w902 = nowyWezel(902, RED);
+    RBInsert(&korzen, w902);
+    drukujDot(korzen);
+    drukuj(korzen);
+    //getchar();
 
-         w6=nowyWezel(6,BLACK);
-         w9=nowyWezel(9,BLACK);
-         w8->right = w9; w9->p = w8;
-         w8->left = w6; w6->p = w8;
-         drukuj(korzen);
-         drukujDot(korzen);
-         getchar();
-     */
+    Wskwezla w901;
+    w901 = nowyWezel(901, RED);
+    RBInsert(&korzen, w901);
+    drukujDot(korzen);
+    drukuj(korzen);
+    //getchar();
+
+    IleCzerwonychWezlow(korzen);
+    printf("Ilosc Czerwonych Wezlow = %d \n", iloscCzeronych);
+    printf("glebokosc max = %d \n", glebokoscMax(korzen, 0));
+    printf("glebokosc min = %d \n", glebokoscMin(korzen, 0));
     return 0;
 }
 
