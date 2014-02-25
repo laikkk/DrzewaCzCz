@@ -1,3 +1,5 @@
+// Kamil Zieliński 215521 
+// Drzewa cz-cz wstawiania + procedury ( zliczanie czerwonych wezłów, max głebokosc licia , min głębokość liścia)
 //  pmp@inf.ug.edu.pl  2014
 // drukowanie drzew cz-cz z wartownikiem wspolnym
 // dla wszystkich wezlow:
